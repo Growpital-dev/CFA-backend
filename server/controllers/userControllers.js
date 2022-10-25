@@ -1,10 +1,13 @@
 const User = require('../models/User')
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt')
+const { transporter, generateotp } = require('../utils/sendotp')
+
 const saltRounds = 10;
 
 require('dotenv').config();
 
+// signup route
 const signup = async (req, res) => {
 
     const {
@@ -34,12 +37,7 @@ const signup = async (req, res) => {
 
                 // creating a new user
                 const newUser = new User({
-                    Email,
-                    Password,
-                    Phone,
-                    Balance,
-                    Aadhaar_Number,
-                    Verified
+                    Email, Password, Phone, Balance, Aadhaar_Number, Verified
                 })
 
                 // hashing the password
@@ -47,10 +45,14 @@ const signup = async (req, res) => {
 
                 newUser.Password = hash;
 
+
+
                 // storing the user in the database
                 newUser.save()
-                    .then((user) => {
+                    .then(() => {
+
                         res.status(200).json({ success: true, message: "Account created successfully" })
+
                     })
                     .catch((err) => {
                         console.error(err);
@@ -66,6 +68,7 @@ const signup = async (req, res) => {
 }
 
 
+// login route
 const login = async (req, res) => {
 
     const {
@@ -85,8 +88,9 @@ const login = async (req, res) => {
                 })
 
 
-            } else {
                 // if email is present 
+            } else {
+
                 // comparing passwords
                 if (bcrypt.compareSync(Password, user.Password)) {
 
@@ -99,7 +103,13 @@ const login = async (req, res) => {
                         }
                     )
 
-                    return res.status(200).json({ success: true, token: token })
+                    // if the account is not verified
+                    if (user.Verified == 'false') {
+                        return res.status(200).json({ success: false, token: token, verify: user.Verified })
+                    } else {
+                        return res.status(200).json({ success: true, token: token, verify: user.Verified })
+                    }
+
                 } else {
                     return res.status(400).json({ success: false, message: "Invalid credentials" })
                 }
@@ -108,21 +118,163 @@ const login = async (req, res) => {
 
         .catch((err) => {
             console.log(err);
-            return res.status(400).json({ success: false, message: "Some error occured" })
+            return res.status(400).json({ success: false, message: "Some error occurred" })
+        })
+}
+
+
+const getprofile = async (req, res) => {
+
+    // object id of user
+    const id = req.user.user_id
+
+    User.findById(id).select("-Password")
+        .then((data) => {
+            console.log(data);
+            res.status(200).json({ success: true, data: data })
+        })
+        .catch((err) => {
+            console.log(err);
+            res.status(400).json({ success: false, message: "some error occurred" })
         })
 }
 
 
 
+const updateprofile = (req, res) => {
+
+    // object id of user
+    const id = req.user.user_id
+    console.log(req.body);
+
+    // updating data
+    User.findByIdAndUpdate(
+        // searching by id
+        { _id: id },
+        // items to be updated
+        req.body,
+
+        (err, data) => {
+            if (err) {
+                res.status(400).json({ success: false, message: "couldn't update data" })
+            } else {
+
+                User.findById(id)
+                    .then((data) => {
+                        console.log(data);
+                        res.status(200).json({ success: true, message: data })
+
+                    })
+                    .catch((err) => {
+                        console.log(err);
+                        res.status(400).json({ success: false, message: "some error occured" })
+
+                    })
+            }
+        }
+    )
+}
 
 
-const home = (req, res) => {
 
-    res.status(200).json({success:true, message:"you are authenticated"})
+const sendotp = (req, res) => {
+    // object id of user
+    const id = req.user.user_id
+
+    User.findById(id)
+        .then((saveduser) => {
+
+            // otp generator 
+            const six_digit = generateotp()
+            saveduser.Otp = six_digit
+            //  console.log(six_digit);
+
+            saveduser.save()
+                .then((data) => {
+                    console.log(data);
+                })
+                .catch((err) => {
+                    res.status(400).json({ success: false, message: "some error occurred" })
+
+                })
+
+            const mailOptions = {
+                from: 'growpitaladarsh@gail.com',
+                to: saveduser.Email,
+                subject: 'verify email',
+                text: `${six_digit}`
+            };
+
+
+
+
+            //  sending email to the user
+            transporter.sendMail(mailOptions, function (error, info) {
+
+                if (error) {
+                    success = false;
+                    console.log(error);
+                    res.status(400).json({ success: false, message: "some error occurred" })
+
+                } else {
+                    success = true;
+                    res.status(200).json({ success: true, message: "An Otp has been sent to your email" })
+                }
+            });
+
+
+        })
+        .catch((err) => {
+            console.log(err);
+            res.status(400).json({ success: false, message: "some error occurred" })
+        })
+}
+
+
+const verifyotp = (req, res) => {
+
+    const id = req.user.user_id
+    const Otp = req.body.Otp
+
+
+    console.log(Otp);
+
+    User.findById(id)
+        .then((saveduser) => {
+
+
+            if (saveduser.Otp != Otp) {
+                res.status(400).json({ success: false, message: "wrong otp" })
+
+
+
+            } else {
+                saveduser.Verified = 'true';
+
+
+                saveduser.save()
+                    .then(() => {
+                        res.status(200).json({ success: true, message: "Account verification successfull" })
+
+                    })
+                    .catch((err) => {
+                        res.status(400).json({ success: false, message: "some error occurred" })
+
+                    })
+            }
+
+        })
+        .catch((err) => {
+            console.log(err);
+            res.status(400).json({ success: false, message: "some error occurred" })
+        })
 }
 
 module.exports = {
     login,
     signup,
-    home
+    getprofile,
+    updateprofile,
+    sendotp,
+    verifyotp
 }
