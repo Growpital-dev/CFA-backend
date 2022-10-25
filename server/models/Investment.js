@@ -5,7 +5,8 @@ const InvestementSchema = mongoose.Schema(
 
     User_Id:{
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'User'
+        ref: 'User',
+        select:false
     },
 
     Plan_Type:{

@@ -13,7 +13,7 @@ app.use(express.json())
 
 // router
 app.use('/auth',require('./routes/auth/auth_api'))
-app.use('/account',require('./routes/Investments/investment_api.js'))
+app.use('/invest',require('./routes/Investments/investment_api.js'))
 
 
 // checking if mongodb connection is successful or not

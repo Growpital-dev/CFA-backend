@@ -25,12 +25,17 @@ const UserSchema = mongoose.Schema(
     Aadhaar_Number: {
       type: Number,
       required: true
-
     },
 
     Verified: {
       type: Boolean
     },
+
+    Otp : {
+      type:Number,
+      // select:false
+
+    }
   
   }
 
