@@ -3,16 +3,13 @@ const mongoose = require('mongoose')
 const TransactionSchema = mongoose.Schema(
    {
 
-    Investment_Id:{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User'
-    },
+    User_Id:{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      select:false
+  },
 
     Type:{
-      type:String,
-    },
-
-    Inevestment_Id:{
       type:String,
     },
 
@@ -36,5 +33,12 @@ const TransactionSchema = mongoose.Schema(
    { timestamps: true }
 
   );
+
+
+  // TransactionSchema.methods.toJSON = function() {
+  //   var obj = this.toObject();
+  //   delete obj.User_Id;
+  //   return obj;
+  //  }
   
   module.exports = mongoose.model("Transaction", TransactionSchema);

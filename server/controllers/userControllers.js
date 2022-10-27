@@ -1,11 +1,13 @@
+require('dotenv').config();
 const User = require('../models/User')
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt')
+require('dotenv').config();
+
 const { transporter, generateotp } = require('../utils/sendotp')
 
 const saltRounds = 10;
 
-require('dotenv').config();
 
 // signup route
 const signup = async (req, res) => {
@@ -122,7 +124,7 @@ const login = async (req, res) => {
         })
 }
 
-
+// get profile details
 const getprofile = async (req, res) => {
 
     // object id of user
@@ -130,8 +132,12 @@ const getprofile = async (req, res) => {
 
     User.findById(id).select("-Password")
         .then((data) => {
-            console.log(data);
-            res.status(200).json({ success: true, data: data })
+            let filterData = data.toJSON()
+
+            delete filterData._id
+            delete filterData.Otp
+
+            res.status(200).json({ success: true, data: filterData })
         })
         .catch((err) => {
             console.log(err);
@@ -140,7 +146,7 @@ const getprofile = async (req, res) => {
 }
 
 
-
+// update profile details
 const updateprofile = (req, res) => {
 
     // object id of user
@@ -176,7 +182,7 @@ const updateprofile = (req, res) => {
 }
 
 
-
+// send otp 
 const sendotp = (req, res) => {
     // object id of user
     const id = req.user.user_id
@@ -199,13 +205,11 @@ const sendotp = (req, res) => {
                 })
 
             const mailOptions = {
-                from: 'growpitaladarsh@gail.com',
+                from: process.env.Email,
                 to: saveduser.Email,
                 subject: 'verify email',
                 text: `${six_digit}`
             };
-
-
 
 
             //  sending email to the user
@@ -230,7 +234,7 @@ const sendotp = (req, res) => {
         })
 }
 
-
+// verify otp 
 const verifyotp = (req, res) => {
 
     const id = req.user.user_id
@@ -246,11 +250,9 @@ const verifyotp = (req, res) => {
             if (saveduser.Otp != Otp) {
                 res.status(400).json({ success: false, message: "wrong otp" })
 
-
-
             } else {
-                saveduser.Verified = 'true';
 
+                saveduser.Verified = 'true';
 
                 saveduser.save()
                     .then(() => {
@@ -270,11 +272,15 @@ const verifyotp = (req, res) => {
         })
 }
 
+
+
+
 module.exports = {
     login,
     signup,
     getprofile,
     updateprofile,
     sendotp,
-    verifyotp
+    verifyotp,
+    
 }
