@@ -22,6 +22,7 @@ router.post("/signup" , signup )
 // send otp to user
 router.get("/otp" ,jwt_auth ,sendotp  )
 
+// verify otp
 router.post("/otp" ,jwt_auth ,verifyotp  )
 
 // fetch profile data
@@ -29,6 +30,8 @@ router.get("/profile" , jwt_auth ,getprofile )
 
 // update profile data
 router.patch("/profile" , jwt_auth , updateprofile )
+
+
 
 // // sendign otp to user 
 // router.post("/verification" , jwt_auth , sendotp )
