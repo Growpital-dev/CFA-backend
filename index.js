@@ -1,6 +1,7 @@
 const express = require('express');
 const { mongoose } = require('mongoose');
 const connectDB = require('./db/db')
+const cors = require('cors')
 const app = express();
 const port = process.env.PORT || 3500;
 
@@ -9,7 +10,9 @@ const port = process.env.PORT || 3500;
 // connect to mongoose
 connectDB();
 
+app.use(cors())
 app.use(express.json())
+
 
 // router
 app.use('/auth',require('./routes/auth/auth_api'))
