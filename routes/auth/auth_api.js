@@ -5,6 +5,7 @@ const {
     getprofile,
     sendotp,
     updateprofile,
+    isEmailValid
 
 } = require ('../../controllers/userControllers')
 
@@ -15,6 +16,9 @@ const router = require('express').Router();
 
 // login 
 router.post("/login"  ,login )
+
+// check if email is already registerd
+router.post("/email"  ,isEmailValid )
 
 //signup
 router.post("/signup" , signup )
