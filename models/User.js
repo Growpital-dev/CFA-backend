@@ -3,6 +3,11 @@ const mongoose = require('mongoose')
 const UserSchema = mongoose.Schema(
   {
 
+    Name:{
+      type: String,
+      required: true
+    },
+
     Email: {
       type: String,
       required: true
@@ -25,6 +30,16 @@ const UserSchema = mongoose.Schema(
     Aadhaar_Number: {
       type: Number,
       required: true
+    },
+
+    IFSC_Code: {
+      type: String,
+      required: true
+    },
+
+    Account_No:{
+      type:String,
+      require:true,
     },
 
     Verified: {

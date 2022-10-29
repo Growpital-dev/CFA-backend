@@ -8,6 +8,37 @@ const { transporter, generateotp } = require('../utils/sendotp')
 
 const saltRounds = 10;
 
+const isEmailValid = async (req,res)=>{
+
+    const {Email} = req.body;
+
+    User.findOne({ Email: Email })
+        // if Email already exists in the database
+        .then((savedUser) => {
+
+            if (savedUser) {
+                return res.status(422).json(
+                    {
+                        success: false,
+                        error: "Email already exists"
+                    })
+
+                // if Email is not present in the database
+            } else {
+
+                return res.status(200).json(
+                    {
+                        success: true,
+                        error: "Success"
+                    })
+            }
+        })
+        .catch((err) => {
+            console.error(err);
+
+            res.status(400).json({ success: false, message: "some error occurred" })
+        })
+}
 
 // signup route
 const signup = async (req, res) => {
@@ -18,8 +49,10 @@ const signup = async (req, res) => {
         Phone,
         Balance,
         Aadhaar_Number,
-        Verified
     } = req.body;
+
+
+    const Verified = false;
 
 
 
@@ -78,6 +111,8 @@ const login = async (req, res) => {
         Password,
     } = req.body;
 
+    console.log(Email,Password);
+
     // searching for email in the database
     User.findOne({ Email: Email })
         .then((user) => {
@@ -107,12 +142,16 @@ const login = async (req, res) => {
 
                     // if the account is not verified
                     if (user.Verified == 'false') {
+                        console.log("no");
                         return res.status(200).json({ success: false, token: token, verify: user.Verified })
                     } else {
+                        console.log("kk");
                         return res.status(200).json({ success: true, token: token, verify: user.Verified })
                     }
 
                 } else {
+                    console.log("no");
+
                     return res.status(400).json({ success: false, message: "Invalid credentials" })
                 }
             }
@@ -276,6 +315,7 @@ const verifyotp = (req, res) => {
 
 
 module.exports = {
+    isEmailValid,
     login,
     signup,
     getprofile,

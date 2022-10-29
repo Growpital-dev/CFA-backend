@@ -23,7 +23,7 @@ app.use('/invest',require('./routes/Investments/investment_api.js'))
 mongoose.connection.once('open',()=>{
     console.log('Connected to MongoDB');
     app.listen(port,()=>{
-        console.log(`server started at port 3000`);
+        console.log(`server started at port ${port}`);
     })
 })
 
