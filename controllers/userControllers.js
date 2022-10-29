@@ -44,11 +44,14 @@ const isEmailValid = async (req,res)=>{
 const signup = async (req, res) => {
 
     const {
+        Name,
         Email,
         Password,
         Phone,
         Balance,
         Aadhaar_Number,
+        IFSC_Code,
+        Account_No
     } = req.body;
 
 
@@ -72,7 +75,7 @@ const signup = async (req, res) => {
 
                 // creating a new user
                 const newUser = new User({
-                    Email, Password, Phone, Balance, Aadhaar_Number, Verified
+                    Name,Email, Password, Phone, Balance, Aadhaar_Number, Account_No,IFSC_Code,Verified
                 })
 
                 // hashing the password
@@ -145,7 +148,6 @@ const login = async (req, res) => {
                         console.log("no");
                         return res.status(200).json({ success: false, token: token, verify: user.Verified })
                     } else {
-                        console.log("kk");
                         return res.status(200).json({ success: true, token: token, verify: user.Verified })
                     }
 
