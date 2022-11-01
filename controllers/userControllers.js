@@ -124,7 +124,7 @@ const login = async (req, res) => {
             if (!user) {
                 return res.status(422).json({
                     success: false,
-                    error: "Email is is not registered"
+                    error: "Email is not registered"
                 })
 
 
