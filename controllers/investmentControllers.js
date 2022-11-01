@@ -1,38 +1,53 @@
 const Investment = require('../models/Investment')
 const Transaction = require("../models/Transaction")
+const User = require('../models/User')
 
 const newInvestments = async (req, res) => {
+
+
 
     const {
         Plan_Type,
         Principal,
-     } = req.body;
+        Roi
+    } = req.body;
 
-
-
-
-     // creating new investement object
+    // creating new investement object
     let newInvestments = new Investment({
         User_Id: req.user.user_id,
         Plan_Type: Plan_Type,
-        Principal: Principal
+        Principal: Principal,
+        Roi: Roi
     })
+
+    // acount no of the user
+    const Account_No = await User.findById(req.user.user_id)
+        .then((saveduser) => {
+            return saveduser.Account_No;
+        })
+        .catch((err) => {
+            console.log(err);
+            res.status(400).json({ success: false, message: "some error occurred" })
+        })
+
+    console.log(Account_No);
+
 
     let newTransaction = new Transaction({
         User_Id: req.user.user_id,
-        Amount:Principal,
-        Sender: "PUNBO031000",
+        Amount: Principal,
+        Sender: Account_No,
         Receiver: "Growpital",
-        Status:"Success"
+        Status: "Success"
     })
 
     newTransaction.save()
-        .then((data)=>{
+        .then((data) => {
             console.log(data);
             // res.status(200).json({success:true, data:data  })
         })
         .catch((err) => {
-            res.status(400).json({ success:false,message: "failed" })
+            res.status(400).json({ success: false, message: "failed" })
 
         })
 
@@ -49,33 +64,34 @@ const newInvestments = async (req, res) => {
 
 }
 
-const getAllInvestments =  (req, res) => {
+// get all investments
+const getAllInvestments = (req, res) => {
 
     const id = req.user.user_id
     Investment.find(
         { User_Id: id },
         (err, data) => {
             if (err) {
-                res.status(400).json({ success:false, message: "Some error occurred" })
+                res.status(400).json({ success: false, message: "Some error occurred" })
             } else {
-                res.status(200).json({ success:true,  data: data })
+                res.status(200).json({ success: true, data: data })
             }
         }
     )
 
 }
 
-const transaction =  (req, res) => {
+const transaction = (req, res) => {
 
     const id = req.user.user_id
     Transaction.find(
         { User_Id: id },
         (err, data) => {
             if (err) {
-                res.status(400).json({ success:false, message: "Some error occurred" })
+                res.status(400).json({ success: false, message: "Some error occurred" })
             } else {
                 console.log(id);
-                res.status(200).json({ success:true,  data: data })
+                res.status(200).json({ success: true, data: data })
             }
         }
     )
@@ -123,5 +139,5 @@ module.exports = {
     getAllInvestments,
     transaction,
     newtransaction
-    
+
 }

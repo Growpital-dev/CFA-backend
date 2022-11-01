@@ -17,6 +17,11 @@ const InvestementSchema = mongoose.Schema(
     Principal:{
         type:Number,
         required:true
+    },
+
+    Roi:{
+      type:String,
+      require:true
     }
 
    },
